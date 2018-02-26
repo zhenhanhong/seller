@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder ignore-resource-not-found="true" location="classpath*:/application.properties,classpath:redis.properties" />
+
+        <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+            <property name="maxIdle" value="${redis.maxIdle}" />
+            <property name="maxWaitMillis" value="${redis.maxWait}" />
+            <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+        </bean>
+
+        <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+              p:hostName="${redis.host}" p:port="${redis.port}" p:password="${redis.pass}"  p:poolConfig-ref="poolConfig"/>
+
+        <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate" p:connectionFactory-ref="jedisConnectionFactory" >
+            <property name="keySerializer">
+                <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+            </property>
+            <property name="valueSerializer">
+                <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+            </property>
+        </bean>
+
+        <bean id="redispoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+            <property name="maxIdle" value="${redis.maxIdle}" />
+            <property name="maxWaitMillis" value="${redis.maxWait}" />
+            <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+        </bean>
+
+        <bean id="jedisConnectionRedisFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+              p:hostName="${redis.host}" p:port="${redis.port}" p:password="${redis.pass}"  p:poolConfig-ref="redispoolConfig" p:database="${redis.database}"/>
+
+        <bean id="redisPoolTemplate" class="org.springframework.data.redis.core.RedisTemplate" p:connectionFactory-ref="jedisConnectionRedisFactory" >
+            <property name="keySerializer">
+                <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+            </property>
+            <property name="valueSerializer">
+                <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+            </property>
+        </bean>
+</beans>
